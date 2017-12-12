@@ -1,12 +1,14 @@
-package DataPreparation;
+package model;
+
+import util.URLUTF8Encoder;
 
 public class HtmlLink{
 
-	String url;
-	String anchorText;
-	String fullSentence;
-	int start;
-	int end;
+	private String url;
+	private String anchorText;
+	private String fullSentence;
+	private int start;
+	private int end;
 	
 	public HtmlLink(){};
 
@@ -20,10 +22,14 @@ public class HtmlLink{
 				+ ", start=" + start + ", end=" + end + "]";
 	}
 
-	public String getUrl() {
+	public String getDecodedUrl() {
 		return URLUTF8Encoder.decodeJavaNative(url);
 	}
 
+	public String getUrl() {
+		return url;
+	}
+	
 	public String getFullSentence(){
 		return fullSentence;
 	}
@@ -49,6 +55,21 @@ public class HtmlLink{
 	public void setPostion(int start2, int end2) {
 		this.start = start2;
 		this.end = end2;
-		
+	}
+
+	public int getStart() {
+		return start;
+	}
+
+	public void setStart(int start) {
+		this.start = start;
+	}
+
+	public int getEnd() {
+		return end;
+	}
+
+	public void setEnd(int end) {
+		this.end = end;
 	}
 }

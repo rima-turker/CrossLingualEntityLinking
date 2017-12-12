@@ -1,8 +1,10 @@
-package DataPreparation;
+package util;
 
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import model.HtmlLink;
 
 public class HTMLLinkExtractor {
 

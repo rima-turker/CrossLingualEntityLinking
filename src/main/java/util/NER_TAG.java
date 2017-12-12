@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package util;
 
 public enum NER_TAG {
 	PERSON("PERSON"), LOCATION("LOCATION"), ORGANIZATION("ORGANIZATION")

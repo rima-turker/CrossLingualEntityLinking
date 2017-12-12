@@ -12,23 +12,42 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-public class GenerateDatasetForWordToVec {
-	private static final Logger LOG = Logger.getLogger(GenerateDatasetForWordToVec.class);
+import com.twelvemonkeys.lang.StringUtil;
 
+import model.HtmlLink;
+import util.Config;
+import util.HTMLLinkExtractor;
+
+
+public class GenerateDatasetForWordToVec {
+	private static final String WIKIPEDIA_ALLANNOTATED_SENTENCES = Config.getString("WIKIPEDIA_ALLANNOTATED_SENTENCES", "");
+	private static final Logger LOG = Logger.getLogger(GenerateDatasetForWordToVec.class);
+	static final Logger secondLOD = Logger.getLogger("debugLogger");
+	static final Logger resultLog = Logger.getLogger("reportsLogger");
 	//private static final String fileMapping = Global.FILE_MAP;
 	//private static final String fileWikiSentencesWithLinks =Global.FILE_DE_ALL_SENTENCES_CONTAINSLINK;
 
+	/*
+	 * LOG.info("LOG1");
+		secondLOD.info("LOG2");
+		resultLog.info("LOG3");
+		private static final Logger LOG = Logger.getLogger(Main.class);
+	static final Logger secondLOD = Logger.getLogger("debugLogger");
+	static final Logger resultLog = Logger.getLogger("reportsLogger");
+	 */
 	private static final String fileMapping = "interlangual_en_de_mapping";
-	private static final String fileWikiSentencesWithLinks = "de_wiki_sentences";
 
 	/**
-	 * 
+	 * This function creates a new dataset for word2vec
+	 * simply gets as a input all the sentences that are annotated(in german) 
+	 * and replaces the corresponding anchor text and URI with the 
+	 * english URI, keeps the words(but not the anchor text as it is replaced) and removes the puctiotaions
 	 */
-	public void de_getWordsEntities_en_mapping() {
+	public void generate_dataSet_DE_enEntity_deWordSim() {
 		final Map<String, String> de_engMap = new HashMap<String, String>(createMapping(fileMapping));
 
 		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();
-		try (final BufferedReader br = new BufferedReader(new FileReader(fileWikiSentencesWithLinks))) {
+		try (final BufferedReader br = new BufferedReader(new FileReader(WIKIPEDIA_ALLANNOTATED_SENTENCES))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				final Map<String, String> punctuationHelper = new HashMap<>();
@@ -37,7 +56,7 @@ public class GenerateDatasetForWordToVec {
 				final Vector<HtmlLink> links = htmlLinkExtractor.grabHTMLLinks(line);
 				for (final Iterator<?> iterator = links.iterator(); iterator.hasNext();) {
 					final HtmlLink htmlLink = (HtmlLink) iterator.next();
-					final String deUrl = htmlLink.getUrl();
+					final String deUrl = htmlLink.getDecodedUrl();
 					final String enUrl = de_engMap.get(deUrl);
 					String finalEnUrl = "dbr:" + enUrl;
 					String randomString = getSaltString();
@@ -45,12 +64,11 @@ public class GenerateDatasetForWordToVec {
 						finalEnUrl = "";
 					}
 					punctuationHelper.put(randomString, finalEnUrl);
-					resultLine.replace(htmlLink.start + offset, htmlLink.end + offset, randomString);
-					offset += (randomString.length() - (htmlLink.end - htmlLink.start));
+					resultLine.replace(htmlLink.getStart() + offset, htmlLink.getEnd() + offset, randomString);
+					offset += (randomString.length() - (htmlLink.getEnd() - htmlLink.getStart()));
 				}
 
-				resultLine = new StringBuilder(
-						resultLine.toString().replaceAll("[^\\w\\s]", "").replaceAll("[\\d]", "").toLowerCase());
+				resultLine = new StringBuilder(util.StringUtil.removePuntionation(resultLine.toString()).toLowerCase());
 				String finalResultLine = new String(resultLine.toString());
 				for (Entry<String, String> entry : punctuationHelper.entrySet()) {
 					finalResultLine = finalResultLine.replace(entry.getKey(), entry.getValue());
@@ -68,14 +86,38 @@ public class GenerateDatasetForWordToVec {
 			e.printStackTrace();
 		}
 	}
-	
 	/**
-	 * Exactly same as de_getWordsEntities_en_mapping
-	 * but only for English entities
+	 * This function creates a data set for word2vec keeps the only entities 
 	 */
-	public void generateEnTrainSetforEntityWordSimilarity() {
+	public void generate_dataSet_EN_enEntity_enEntitySimilarity() {
 		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();
-		try (final BufferedReader br = new BufferedReader(new FileReader(fileWikiSentencesWithLinks))) {
+		try (final BufferedReader br = new BufferedReader(new FileReader(WIKIPEDIA_ALLANNOTATED_SENTENCES))) {
+			String line;
+			StringBuilder strBuild = new StringBuilder();
+			while ((line = br.readLine()) != null) {
+				final Vector<HtmlLink> links = htmlLinkExtractor.grabHTMLLinks(line);
+				for (final Iterator<?> iterator = links.iterator(); iterator.hasNext();) {
+					final HtmlLink htmlLink = (HtmlLink) iterator.next();
+					final String enUrl = htmlLink.getDecodedUrl();
+					String finalEnUrl = "dbr:" + enUrl;
+					strBuild.append(finalEnUrl+" ");
+				}
+				if (strBuild.toString().contains("dbr:")) {
+					secondLOD.info(strBuild.toString());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * Exactly the same as de_getWordsEntities_en_mapping
+	 * but for english sentences (english URI)
+	 */
+	public void generate_dataSet_EN_enEntity_enWordSimityWordSim() {
+		System.out.println("generate_dataSet_EN_enEntity_enWordSimityWordSim");
+		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();
+		try (final BufferedReader br = new BufferedReader(new FileReader(WIKIPEDIA_ALLANNOTATED_SENTENCES))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				final Map<String, String> punctuationHelper = new HashMap<>();
@@ -84,12 +126,12 @@ public class GenerateDatasetForWordToVec {
 				final Vector<HtmlLink> links = htmlLinkExtractor.grabHTMLLinks(line);
 				for (final Iterator<?> iterator = links.iterator(); iterator.hasNext();) {
 					final HtmlLink htmlLink = (HtmlLink) iterator.next();
-					final String enUrl = htmlLink.getUrl();
+					final String enUrl = htmlLink.getDecodedUrl();
 					String finalEnUrl = "dbr:" + enUrl;
 					String randomString = getSaltString();
 					punctuationHelper.put(randomString, finalEnUrl);
-					resultLine.replace(htmlLink.start + offset, htmlLink.end + offset, randomString);
-					offset += (randomString.length() - (htmlLink.end - htmlLink.start));
+					resultLine.replace(htmlLink.getStart() + offset, htmlLink.getEnd()+ offset, randomString);
+					offset += (randomString.length() - (htmlLink.getEnd()- htmlLink.getStart()));
 				}
 
 				resultLine = new StringBuilder(
@@ -101,7 +143,7 @@ public class GenerateDatasetForWordToVec {
 
 				finalResultLine = finalResultLine.toString().replaceAll(" +", " ").trim();
 				if (finalResultLine.contains("dbr:")) {
-					LOG.info(finalResultLine);
+					LOG.info(finalResultLine.toLowerCase());
 				}
 //				 System.err.println(line);
 //				 System.err.println(finalResultLine);
@@ -111,9 +153,43 @@ public class GenerateDatasetForWordToVec {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Data set generator removes tags keeps mentions i.e only words plain text 
+	 * You could also use whole wikipedia for this dataset generation
+	 */
+	public void generate_dataSet_EN_enWord_enWordSim() {
+
+		System.out.println("generate_dataSet_EN_enWord_enWordSim");
+		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();
+		try (final BufferedReader br = new BufferedReader(new FileReader(WIKIPEDIA_ALLANNOTATED_SENTENCES))) {
+//		try (final BufferedReader br = new BufferedReader(new FileReader("/home/rtue/workspace/Wikipedia/bin/temp_WikiSentencesLinks"))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				int offset = 0;
+				StringBuilder resultLine = new StringBuilder(line);
+				final Vector<HtmlLink> links = htmlLinkExtractor.grabHTMLLinks(line);
+				for (final Iterator<?> iterator = links.iterator(); iterator.hasNext();) {
+					final HtmlLink htmlLink = (HtmlLink) iterator.next();
+					String anchor = htmlLink.getAnchorText();
+					resultLine.replace(htmlLink.getStart() + offset, htmlLink.getEnd() + offset, anchor);
+					offset += (anchor.length() - (htmlLink.getEnd() - htmlLink.getStart()));
+				}
+				resultLine = new StringBuilder(util.StringUtil.removePuntionation(resultLine.toString()).toLowerCase());
+				String finalResultLine = new String(resultLine.toString());
+
+				finalResultLine = finalResultLine.toString().replaceAll(" +", " ").trim();
+				secondLOD.info(finalResultLine);
+//				 System.err.println(line);
+//				 system.err.println(finalresultline);
+//				 system.err.println("---------------------------------------------------");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/**
-	 * This function generate random string
+	 * This function generates random string
 	 * 
 	 * @return
 	 */

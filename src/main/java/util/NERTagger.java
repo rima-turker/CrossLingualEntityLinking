@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package util;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

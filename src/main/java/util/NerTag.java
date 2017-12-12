@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package util;
 
 public class NerTag {
 	private final String word;
