@@ -11,9 +11,14 @@ repositories {
     jcenter()
 }
 
-mainClassName="Examples.Main"
+//mainClassName="AnchorDictionaryGenerator.DictioanryGenerator"
+//mainClassName="DataPreparation.NegativeTrainDataGenerator"
+//mainClassName="DataPreparation.Test"
+//mainClassName="DataPreparation.TrainDataGenerator"
+//mainClassName="DataPreparation.ConcatenateTrainingFiles"
+mainClassName="DataPreparation.Evaluation"
 
-applicationDefaultJvmArgs = ["-Xmx30g"]
+applicationDefaultJvmArgs = ["-Xmx40g"]
 
 dependencies {
 	compile group: 'org.deeplearning4j', name: 'deeplearning4j-nlp', version: '0.9.1'
@@ -41,20 +46,12 @@ remotes {
     }
 }
 
-task showPlatformVersion << {
-    println ssh.version
-    ssh.run {
-        session(remotes.server) {
-            execute 'uname -a'
-            execute 'cat /etc/*-release', ignoreError: true
-        }
-    }
-}
 task deploy(dependsOn: installDist) << {
     ssh.run {
         session(remotes.server) {
          	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking'
             put from: './build/install/CrossLingualEntityLinking', into: '/home/rima/playground/'
+            execute 'cp -r /home/rima/playground/GeneralFiles/edu /home/rima/playground/CrossLingualEntityLinking/bin'
             execute 'chmod +x /home/rima/playground/CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
             execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking /home/rima/playground/WikipediaFiles/WikiSentencesLinks_0.3_ordered'
             //get from: '/home/rima/playground/CrossLingualEntityLinking/bin/log', into: '.'
@@ -63,6 +60,7 @@ task deploy(dependsOn: installDist) << {
 }
 jar {    
    exclude('config.properties')
+   exclude('edu')
 }
 
 applicationDistribution.from("src/main/resources/config.properties") {
@@ -74,5 +72,84 @@ task copyConfiguration << {
         from "src/main/environment/$environment"
         into "src/main/resources"
         include "**/*"
+    }
+}
+
+
+task deployZip(dependsOn: distTar) {
+    doLast {
+    	ssh.run {
+	        session(remotes.server) {        
+	         	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking'         	
+	            put from: './build/distributions/CrossLingualEntityLinking.tar', into: '/home/rima/playground/'	            	           
+	            execute 'cd /home/rima/playground/ && tar -xf CrossLingualEntityLinking.tar'            
+	            execute 'cd /home/rima/playground/ && chmod +x CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
+	            execute 'cp -r /home/rima/playground/GeneralFiles/edu /home/rima/playground/CrossLingualEntityLinking/bin'
+	            execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking'	            
+	        }
+    	}
+    }
+}
+
+
+startScripts {
+   classpath += files('bin')
+   doLast {
+       def windowsScriptFile = file getWindowsScript()
+       def unixScriptFile    = file getUnixScript()
+       windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\bin', '%APP_HOME%\\bin')
+       unixScriptFile.text    = unixScriptFile.text.replace('$APP_HOME/lib/bin', '$APP_HOME/bin')
+   }
+}
+
+task deployOnlyJar(dependsOn: installDist) << {
+    ssh.run {
+        session(remotes.server) {         	
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/lib/CrossLingualEntityLinking.jar'
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/log'
+            put from: './build/install/CrossLingualEntityLinking/lib/CrossLingualEntityLinking.jar', into: '/home/rima/playground/CrossLingualEntityLinking/lib'
+            execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking /home/rima/playground/WikipediaFiles/WikiSentencesLinks_0.3_ordered'            
+        }
+    }
+}
+
+task deployOnlyExe(dependsOn: installDist) << {
+    ssh.run {
+        session(remotes.server) {         	
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/log'
+            put from: './build/install/CrossLingualEntityLinking/bin/CrossLingualEntityLinking', into: '/home/rima/playground/CrossLingualEntityLinking/bin'
+            execute 'chmod +x /home/rima/playground/CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
+            execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking /home/rima/playground/WikipediaFiles/WikiSentencesLinks_0.3_ordered'            
+        }
+    }
+}
+
+task deployOnlyConfig() << {
+    ssh.run {
+        session(remotes.server) {         	
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/config.properties'
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/log'
+            put from: '/home/rtue/workspace/CrossLingualEntityLinking/src/main/resources/config.properties', into: '/home/rima/playground/CrossLingualEntityLinking/bin'            
+            execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking /home/rima/playground/WikipediaFiles/WikiSentencesLinks_0.3_ordered'            
+        }
+    }
+}
+
+task deployAllButLibs(dependsOn: installDist) << {
+    ssh.run {
+        session(remotes.server) {         	
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/log'
+        	
+        	execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/lib/CrossLingualEntityLinking.jar'
+            put from: './build/install/CrossLingualEntityLinking/lib/CrossLingualEntityLinking.jar', into: '/home/rima/playground/CrossLingualEntityLinking/lib'
+            execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
+            put from: './build/install/CrossLingualEntityLinking/bin/CrossLingualEntityLinking', into: '/home/rima/playground/CrossLingualEntityLinking/bin'
+            execute 'chmod +x /home/rima/playground/CrossLingualEntityLinking/bin/CrossLingualEntityLinking'
+            execute 'rm -rf /home/rima/playground/CrossLingualEntityLinking/bin/config.properties'
+            put from: '/home/rtue/workspace/CrossLingualEntityLinking/src/main/resources/config.properties', into: '/home/rima/playground/CrossLingualEntityLinking/bin'            
+
+            execute 'cd /home/rima/playground/CrossLingualEntityLinking/bin && ./CrossLingualEntityLinking /home/rima/playground/WikipediaFiles/WikiSentencesLinks_0.3_ordered'
+        }
     }
 }

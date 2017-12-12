@@ -6,6 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import util.Entity;
+import util.NER_TAG;
+
 public class EntityCandidateGenerator_yovisto {
 
 	public static List<String> getCandidateList(String surfaceForm, String type) {
