@@ -1,9 +1,9 @@
 package util;
 
-public class Touple {
+public class Tuple {
 	private final String a;
 	private final String b;
-	public Touple(String a, String b) {
+	public Tuple(String a, String b) {
 		super();
 		this.a = a;
 		this.b = b;
@@ -36,7 +36,7 @@ public class Touple {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Touple other = (Touple) obj;
+		Tuple other = (Tuple) obj;
 		if (a == null) {
 			if (other.a != null)
 				return false;

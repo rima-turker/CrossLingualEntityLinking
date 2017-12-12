@@ -1,4 +1,4 @@
-package DataPreparation;
+package util;
 
 
 public class URLUTF8Encoder {
