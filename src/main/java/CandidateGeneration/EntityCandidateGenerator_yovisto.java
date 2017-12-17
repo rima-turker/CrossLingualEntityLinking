@@ -19,7 +19,7 @@ public class EntityCandidateGenerator_yovisto {
 		}
 		Request_yovisto r = new Request_yovisto();
 		r.setQuery(surfaceForm);
-		r.setDataFormat(DataForomat.JSONN);
+		r.setDataFormat(DataFormat.JSON);
 
 		String result = Caller_yovisto.runYovisto(r);
 		// String result = Caller.runDBpedia(r);

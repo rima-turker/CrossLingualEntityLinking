@@ -12,7 +12,7 @@ public class Cache {
 		if (ds != null) {
 			return ds;
 		} else {
-			final double[] wordVector = Request.getWordVector(word);
+			final double[] wordVector = Request_word2vecServer.getWordVector(word);
 			cache.put(word, wordVector);
 			return wordVector;
 		}

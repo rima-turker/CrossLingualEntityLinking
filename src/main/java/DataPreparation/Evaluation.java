@@ -25,18 +25,21 @@ import AnchorDictionaryGenerator.DictioanryGenerator;
 import model.HtmlLink;
 import util.Config;
 import util.MapUtil;
+import util.NERTagger;
 import util.Tuple;
 import util.URLUTF8Encoder;
 
 public class Evaluation {
 	private static final int TOP_N = Config.getInt("TOPN_CANDIDATES", -1);
-	private static final Map<String, Map<String, Double>> dic = DictioanryGenerator.readDictionryFromFile();
+	DictioanryGenerator dictioanryGenerator = new DictioanryGenerator();
+	private  final Map<String, Map<String, Double>> dic = dictioanryGenerator.readDictionryFromFile();
 	private static final List<Map<String, List<Helper>>> result = new CopyOnWriteArrayList<>();
 	private static final AtomicInteger CAN_NOT_CALCULATE_FEATURES = new AtomicInteger(0);
 	private static ExecutorService executor;
 
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		try{
+			
 			final EDBanchmark_DataExtraction dataClean = new EDBanchmark_DataExtraction();
 			// mapContext stores sentenceID and the sentence itself
 			final Map<String, String> mapContext = new HashMap<>(dataClean.getContextData());
@@ -135,7 +138,7 @@ public class Evaluation {
 		
 	}
 
-	private static Runnable handle(final String sentence, final List<Tuple> list) {
+	private  Runnable handle(final String sentence, final List<Tuple> list) {
 		return () -> {
 			for (final Tuple t : list) {
 				final String anchorText = t.getA();

@@ -28,7 +28,8 @@ public class NegativeTrainDataGenerator {
 		showSizeOfResultPeridically();
 
 		System.err.println("Dictioanry loading ... ");
-		final Map<String, Map<String, Double>> dic = DictioanryGenerator.readDictionryFromFile();
+		DictioanryGenerator dictioanryGenerator = new DictioanryGenerator();
+		final Map<String, Map<String, Double>> dic = dictioanryGenerator.readDictionryFromFile();
 		System.err.println("Dictioanry loaded");
 
 		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();

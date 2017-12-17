@@ -41,9 +41,8 @@ public class DictionaryTest
 		EDBanchmark_DataExtraction dataClean = new EDBanchmark_DataExtraction();
 		Map <String, List<Tuple>> mapAnchor = new HashMap<>(dataClean.getAnchorsGT());
 		List<Tuple> gt = new ArrayList<>(generateGT_touple(mapAnchor));
-		
-		Map<String,Map<String,Double>> dictionary = new ConcurrentHashMap<>(DictioanryGenerator.readDictionryFromFile());
-		Map<String,Map<String,Double>> dictionary_lowerCase = new ConcurrentHashMap<>(DictioanryGenerator.readDictionryFromFile_lowerCase());
+		DictioanryGenerator dictioanryGenerator = new DictioanryGenerator();
+		Map<String,Map<String,Double>> dictionary = new ConcurrentHashMap<>(dictioanryGenerator.readDictionryFromFile());
 		
 		System.out.println("dictionaries are ready");
 		List<Integer> lstTop = new ArrayList<>();
@@ -87,30 +86,7 @@ public class DictionaryTest
 					System.out.println("not in top 50"+" "+anchor+" "+ gt_link);
 				
 			}
-			else if (dictionary_lowerCase.containsKey(anchor.toLowerCase())) {
-				
-				countFound_lowerCase++;
-				Map<String, Double> mapFirstNCandidates = new LinkedHashMap<String, Double>(
-						MapUtil.getFirstNElement(MapUtil.sortByValueDescending(dictionary_lowerCase.get(anchor.toLowerCase())), topNCandidates));
-				List<String> lstFirstNCandidates_decoded = new LinkedList<String>();
-				
-				for (Entry<String, Double> entry:mapFirstNCandidates.entrySet()) 
-				{
-					lstFirstNCandidates_decoded.add(URLUTF8Encoder.decodeJavaNative(entry.getKey()));
-					
-				}
-				
-				mapAnchorTop.put(anchor,DictionaryTest.findTopN(lstFirstNCandidates_decoded, gt_link));
-				int findN=findTopN(mapFirstNCandidates, anchor);
-				
-				if (findN!=-1) 
-				{
-					lstTop.add(findN);
-					
-				}
-				else
-					System.out.println("not in top 50"+" "+anchor+" "+ gt_link);
-			}
+			
 			else
 			{
 				notFound++;

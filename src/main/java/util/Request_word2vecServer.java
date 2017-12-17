@@ -7,7 +7,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-public class Request {
+public class Request_word2vecServer {
 
 	private static final String BASE_URL = Config.getString("SERVER_BASE_URL", "");
 

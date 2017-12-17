@@ -20,7 +20,8 @@ public class CompareGroundTruthWithDictionary {
 	public static void main(String[] args) {
 		// Read DIC
 		System.err.println("Dictioanry loading ... ");
-		final Map<String, Map<String, Double>> dic = DictioanryGenerator.readDictionryFromFile();
+		DictioanryGenerator dictioanryGenerator = new DictioanryGenerator();
+		final Map<String, Map<String, Double>> dic = dictioanryGenerator.readDictionryFromFile();
 		System.err.println("Dictioanry loaded");
 		// READ GT
 		System.err.println("GT loading ... ");

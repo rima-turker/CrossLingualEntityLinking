@@ -2,12 +2,12 @@ package CandidateGeneration;
 
 public class Request_yovisto {
 	private String query;
-	private DataForomat dataFormat;
+	private DataFormat dataFormat;
 	
-	public DataForomat getDataFormat() {
+	public DataFormat getDataFormat() {
 		return dataFormat;
 	}
-	public void setDataFormat(DataForomat dataFormat) {
+	public void setDataFormat(DataFormat dataFormat) {
 		this.dataFormat = dataFormat;
 	}
 

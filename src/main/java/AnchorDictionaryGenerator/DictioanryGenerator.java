@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,29 +27,40 @@ import util.HTMLLinkExtractor;
 import util.MapUtil;
 
 /**
- * Generate dictioanry out of wikipedia anchortext
+ * Generate dictionary from Wikipedia anchor text FORGOT TO ADD REDIRECT PAGES
  * some point;
+ * - we do not touch the mention itself only double cottaions are removed from beggining and at the end such as "Rima" --> Rima
  * 	- we just keep links which are wikipeida links
  * 		-- E.g we remove www.google.com
- *  - we convert all the urls to decoded url and do lowercase
+ * 
+ *  - we convert all the urls to decoded url and to lowercase
  * @author rtue
  *
  */
+
+ //TODO ADD REDIRECT PAGES to your dictionary to enrich it
 public class DictioanryGenerator {
 
-	private static final String RESULT_FILE = Config.getString("ANCHOR_DICTIONARY", "");
-	private static final String FILES_ADDRESS = "/home/rima/playground/WikipediaFiles/Farshad";
+	private final String RESULT_FILE = Config.getString("ANCHOR_DICTIONARY", "");
+	private static final String FILES_ADDRESS = Config.getString("SPLIT_WIKIPEDIA_ALLANNOTATED_SENTENCES_FOLDER", "");
 	private static ExecutorService executor;
 	//private static int NUMBER_OF_THREADS = 1;
 	private static Map<String,Map<String,Double>> dictionary = new ConcurrentHashMap<>();
+	private static Map<String,List<String>> redirect = new HashMap<>();
+	private final String REDIRECT_FILE = Config.getString("WIKIPEDIA_REDIRECT_PAGES", "");
+	
+	//WIKIPEDIA_REDIRECT_PAGESConfig.getString("ANCHOR_DICTIONARY", "");
+	//private 
+	
+	//https://en.wikipedia.org/w/api.php?action=query&blfilterredir=redirects&bllimit=max&bltitle=Yahoo!&format=json&list=backlinks
+	
+//	public static void main(String[] args) {
+//		createDictionary();		
+//		//dictionary = readDictionryFromFile();
+//	}
 
-	public static void main(String[] args) {
-		createDictionary();		
-		//dictionary = readDictionryFromFile();
-	}
 
-
-	private static void createDictionary() {
+	private void createDictionary() {
 		try {
 			//executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS );
 			executor = Executors.newSingleThreadExecutor();
@@ -70,7 +82,7 @@ public class DictioanryGenerator {
 	}
 
 
-	private static void writeDictionary() {
+	private void writeDictionary() {
 		final List<String> result = new ArrayList<>();
 		for(Entry<String, Map<String, Double>> entry:dictionary.entrySet()) {
 			final StringBuilder s = new StringBuilder();
@@ -139,6 +151,7 @@ public class DictioanryGenerator {
 		if(url.isEmpty()){
 			return false;
 		}
+		//TODO I am not sure about this part
 		if(url.contains("%")){
 			return false;
 		}
@@ -199,7 +212,42 @@ public class DictioanryGenerator {
 		}
 	}
 	
-	public static Map<String,Map<String,Double>> readDictionryFromFile() {
+	/***
+	 * This function collects the redirect pages 
+	 * Map<String,List<String>>
+	 * String= main page the one that we see on the browser
+	 * List<String> stores the list of pages that redirects to that page
+	 * @return
+	 */
+	
+	public Map<String,List<String>> readRedirectPages()
+	{
+		Map<String,List<String>> result = new HashMap<>();
+		String line=null;
+		try (BufferedReader br = new BufferedReader(new FileReader(REDIRECT_FILE))) {
+			while ((line = br.readLine()) != null) {
+				final String[] split = line.toLowerCase().split("\t");
+				final String fromRedirects = split[0];
+				final String toRedirects = split[1];
+				List<String> lstTemp ;
+				if (result.containsKey(toRedirects)) 
+				{
+					lstTemp = new ArrayList<>(result.get(toRedirects));
+				}
+				else
+				{
+					lstTemp = new ArrayList<>();
+				}
+				lstTemp.add(fromRedirects);
+				result.put(toRedirects, lstTemp);
+			}
+		} catch (Exception e) {
+			System.err.println(line);
+			e.printStackTrace();
+		}	
+		return result;
+	}
+	public Map<String,Map<String,Double>> readDictionryFromFile() {
 		Map<String,Map<String,Double>> result = new ConcurrentHashMap<>();
 		String line=null;
 		try (BufferedReader br = new BufferedReader(new FileReader(RESULT_FILE))) {
@@ -215,25 +263,6 @@ public class DictioanryGenerator {
 			}
 		} catch (Exception e) {
 			System.err.println(line);
-			e.printStackTrace();
-		}		
-		return result;
-	}
-	public static Map<String,Map<String,Double>> readDictionryFromFile_lowerCase() {
-		Map<String,Map<String,Double>> result = new ConcurrentHashMap<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(RESULT_FILE))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				final String[] split = line.split("\t");
-				final String anchorText = split[0].toLowerCase();
-				final Map<String,Double> map = new ConcurrentHashMap<>();
-				for(int i=1;i<split.length;i++) {
-					final String[] link_frequency = split[i].split(" ");
-					map.put(link_frequency[0],Double.parseDouble(link_frequency[1]));
-				}
-				result.put(anchorText,MapUtil.sortByValueDescending(map));
-			}
-		} catch (IOException e) {
 			e.printStackTrace();
 		}		
 		return result;
