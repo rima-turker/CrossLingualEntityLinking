@@ -227,10 +227,10 @@ public class DictioanryGenerator {
 		try (BufferedReader br = new BufferedReader(new FileReader(REDIRECT_FILE))) {
 			while ((line = br.readLine()) != null) {
 				final String[] split = line.toLowerCase().split("\t");
-				final String fromRedirects = split[0];
-				final String toRedirects = split[1];
+				final String fromRedirects = split[0].toLowerCase();
+				final String toRedirects = split[1].toLowerCase();//mainpage(exist one)
 				List<String> lstTemp ;
-				if (result.containsKey(toRedirects)) 
+				if (result.containsKey(toRedirects)) //mainPage
 				{
 					lstTemp = new ArrayList<>(result.get(toRedirects));
 				}

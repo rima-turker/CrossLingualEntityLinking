@@ -73,11 +73,18 @@ public class ConllTrainDataGeneration {
 		ConllDataSetParser conll = new ConllDataSetParser();
 		
 		//docID, SentenceID,sentence
-		Map<String, Map<Integer, String>> mapConllTrainSentences = new HashMap<>(conll.getMapSentence_train());
+//		Map<String, Map<Integer, String>> mapConllTrainSentences = new HashMap<>(conll.getMapSentence_train());
+//		//docID SentenceID, Tuple<mention,wikilink>
+//		Map<String, List<ConllData>> mapConllTrainMentions = new HashMap<>(conll.getMapMention_train());
+//		Map<String, Map<Integer, String>> mapConllTestbSentences = new HashMap<>(conll.getMapSentence_testb());
+//		Map<String, List<ConllData>> mapConllTestbMentions = new HashMap<>(conll.getMapMention_testb());
+
+		
+		Map<String, List<ConllData>> mapConllTrainSentences = new HashMap<>(conll.getMap_train());
 		//docID SentenceID, Tuple<mention,wikilink>
-		Map<String, List<ConllData>> mapConllTrainMentions = new HashMap<>(conll.getMapMention_train());
-		Map<String, Map<Integer, String>> mapConllTestbSentences = new HashMap<>(conll.getMapSentence_testb());
-		Map<String, List<ConllData>> mapConllTestbMentions = new HashMap<>(conll.getMapMention_testb());
+		Map<String, List<ConllData>> mapConllTrainMentions = new HashMap<>();
+		Map<String, Map<Integer, String>> mapConllTestbSentences = new HashMap<>();
+		Map<String, List<ConllData>> mapConllTestbMentions = new HashMap<>();
 
 		
 		//showSizeOfResultPeridically();
@@ -96,9 +103,9 @@ public class ConllTrainDataGeneration {
 				
 				for (ConllData conllMention: lstOfMentionsInDoc)
 				{
-					Map<Integer, String> sentenceIDSentence = mapConllTrainSentences.get(entry.getKey());
+					Map<Integer, String> sentenceIDSentence ;
 					Integer sentenceID = conllMention.getSentenceId();
-					String sentence = sentenceIDSentence.get(conllMention.getSentenceId());
+					String sentence = "";
 					System.out.println(sentence);
 					if (mapSentencesAndMentions.containsKey(sentenceID)) {
 						List<Tuple> lstTemp = new ArrayList<>(mapSentencesAndMentions.get(sentenceID));
@@ -118,18 +125,6 @@ public class ConllTrainDataGeneration {
 				
 				
 			}
-			
-			//Map<String, List<Tuple>> trainMentions = new HashMap<>(readMentionsConll(Config.getString("TRAIN_SENTENCES_CONLL_MENTIONS", "")));
-			
-			
-			
-//			int count=0;
-//			for (Entry<String, List<ConllTrainSet>> mentions:trainMentions.entrySet()) {
-//				count+=mentions.getValue().size();
-//			}
-//			System.out.println("Total mentions to be disambiguated " + count);
-//			generateTrainingData(trainSentencs,trainMentions);
-			
 			
 		}else{
 			System.out.println("Negatives Dataset generation");//NegativeTrainConll.replaceWithWrongEntities();	
