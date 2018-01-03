@@ -13,7 +13,7 @@ public class Main {
 //		EvaluationConll ev = new EvaluationConll();
 //		ev.main(null);
 		ConllDataSetParser parser = new ConllDataSetParser();
-		DisambiguateMentions disam = new DisambiguateMentions();
+		LazyDisambuguation disam = new LazyDisambuguation();
 		disam.disambiguateEasyMentions(parser.getMap_testb(),
 				parser.getLstSentencesAndMentions_testb());
 		
