@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package CompareGTAndDic;
 
 import java.util.LinkedList;
 import java.util.List;

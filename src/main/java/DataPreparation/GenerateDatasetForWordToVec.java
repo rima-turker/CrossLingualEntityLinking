@@ -153,6 +153,74 @@ public class GenerateDatasetForWordToVec {
 			e.printStackTrace();
 		}
 	}
+	/***
+	 * In this function we convert annotated wikipedia snetences into
+	 * anchor text dbr:link and the sentence all lower case of course order is preserved
+	 * from sentence first convert umlaut to normal char then remove punctionation with reggex 
+	 * because without converting umlaut punctiotain remover removed the umlaut
+	 */
+	public void generate_dataSet_EN_enEntity_enWordSimityWordSim_SurfaceForm() {
+		System.out.println("generate_dataSet_EN_enEntity_enWordSimityWordSim_SurfaceForm");
+		final HTMLLinkExtractor htmlLinkExtractor = new HTMLLinkExtractor();
+		try (final BufferedReader br = new BufferedReader(new FileReader(WIKIPEDIA_ALLANNOTATED_SENTENCES))) {
+			System.out.println("file name is "+WIKIPEDIA_ALLANNOTATED_SENTENCES);
+			String line;
+			int count=0;
+			while ((line = br.readLine()) != null) {
+				count++;
+				final Map<String, String> punctuationHelper = new HashMap<>();
+				int offset = 0;
+				StringBuilder resultLine = new StringBuilder(line);
+				final Vector<HtmlLink> links = htmlLinkExtractor.grabHTMLLinks(line);
+				for (final Iterator<?> iterator = links.iterator(); iterator.hasNext();) {
+					final HtmlLink htmlLink = (HtmlLink) iterator.next();
+					final String enUrl = htmlLink.getDecodedUrl();
+					final String surfaceForm = util.StringUtil.convertUmlaut(htmlLink.getAnchorText()).replaceAll("[^\\w\\s]", " ").replaceAll("[\\d]", "").toLowerCase();
+					String finalSurfaceAndUrl = surfaceForm+" dbr:" + enUrl.toLowerCase();
+					String randomString = getSaltString();
+					punctuationHelper.put(randomString, finalSurfaceAndUrl);
+					resultLine.replace(htmlLink.getStart() + offset, htmlLink.getEnd()+ offset, randomString);
+					offset += (randomString.length() - (htmlLink.getEnd()- htmlLink.getStart()));
+				}
+
+				resultLine = new StringBuilder(
+						removePunctiotion(resultLine.toString()).toLowerCase());
+				String finalResultLine = new String(resultLine.toString());
+				for (Entry<String, String> entry : punctuationHelper.entrySet()) {
+					finalResultLine = finalResultLine.replace(entry.getKey(), entry.getValue());
+				}
+
+				finalResultLine = finalResultLine.toString().replaceAll(" +", " ").trim();
+//				if (finalResultLine.contains("\n")) {
+//					System.out.println(finalResultLine.toLowerCase());
+//				}
+				if (finalResultLine.contains("dbr:")) {
+					if (finalResultLine.contains("\n")) {
+						secondLOD.info("finalResultLine.contains(\n) "+finalResultLine.toLowerCase());
+						System.out.println(finalResultLine.toLowerCase());
+						finalResultLine =finalResultLine.replace("\n", "");
+						secondLOD.info(finalResultLine.toLowerCase());
+						System.out.println(finalResultLine.toLowerCase());
+					}
+					LOG.info(finalResultLine.toLowerCase());
+				}
+				else
+				{
+					System.out.println("final result does not contain dbr:");
+					System.out.println(finalResultLine.toLowerCase());
+					secondLOD.info("final result does not contain dbr: "+finalResultLine.toLowerCase());
+				}
+				
+				
+//				 System.err.println(line);
+//				 System.err.println(finalResultLine);
+//				 System.err.println("---------------------------------------------------");
+			}
+			System.out.println("line count "+count);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Data set generator removes tags keeps mentions i.e only words plain text 
 	 * You could also use whole wikipedia for this dataset generation
@@ -259,6 +327,11 @@ public class GenerateDatasetForWordToVec {
 			} else
 				return true;
 		}
+	}
+	
+	private String removePunctiotion(String punctionalStr)
+	{
+		return util.StringUtil.convertUmlaut(punctionalStr).replaceAll("[^\\w\\s]", "").replaceAll("[\\d]", "");
 	}
 
 }

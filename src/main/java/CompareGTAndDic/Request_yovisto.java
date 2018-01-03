@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package CompareGTAndDic;
 
 public class Request_yovisto {
 	private String query;

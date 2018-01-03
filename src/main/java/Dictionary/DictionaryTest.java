@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.helpers.Util;
 
 import AnchorDictionaryGenerator.DictioanryGenerator;
-import CandidateGeneration.EntityCandidateGenerator_yovisto;
-import DataPreparation.EDBanchmark_DataExtraction;
+import BenchmarkPreparation.EDBanchmark_DataExtraction;
+import CompareGTAndDic.EntityCandidateGenerator_yovisto;
 import util.Config;
 import util.MapUtil;
 import util.NERTagger;
@@ -56,8 +56,8 @@ public class DictionaryTest
 		for (Tuple touple: gt) 
 		{
 			//TODO: add another fuction for normalization
-			String anchor = touple.getA().replace("  ", " ").replace(" 's", "'s");
-			String gt_link = touple.getB();
+			String anchor = touple.getA_mention().replace("  ", " ").replace(" 's", "'s");
+			String gt_link = touple.getB_link();
 			
 			if (dictionary.containsKey(anchor))
 			{
@@ -108,7 +108,7 @@ public class DictionaryTest
 			List<Tuple> lstTemp = new ArrayList<>(entry.getValue());
 			for(Tuple t : lstTemp)
 			{
-				Tuple newT = new Tuple(t.getA(),t.getB().replace("<http://dbpedia.org/resource/", "").replace("> ;", ""));
+				Tuple newT = new Tuple(t.getA_mention(),t.getB_link().replace("<http://dbpedia.org/resource/", "").replace("> ;", ""));
 				result.add(newT);
 			}
 		}
@@ -163,11 +163,11 @@ public class DictionaryTest
 			for(Tuple tou:lstAnchors)
 			{
 				totalAnchorCount++;
-				String anchor= tou.getA(); //anchor itself
+				String anchor= tou.getA_mention(); //anchor itself
 				String begTemp="<http://dbpedia.org/resource/";
 				String endTemp="> ;";
 				
-				String gt = tou.getB().substring(begTemp.length(), tou.getB().indexOf(endTemp)).toLowerCase();
+				String gt = tou.getB_link().substring(begTemp.length(), tou.getB_link().indexOf(endTemp)).toLowerCase();
 				//corresponding groundTruth
 				
 				/*See if this anchor already being tagged as a person, location or place
@@ -189,10 +189,10 @@ public class DictionaryTest
 					for(Tuple touple:lstTagged)
 					{
 						//it is tagged then you can generate candidates 
-						if (touple.getA().equals(anchor)) 
+						if (touple.getA_mention().equals(anchor)) 
 						{
 							//System.out.println(touple.getB());
-							List<String> candidates = new LinkedList<>(EntityCandidateGenerator_yovisto.getCandidateList(anchor, touple.getB()));
+							List<String> candidates = new LinkedList<>(EntityCandidateGenerator_yovisto.getCandidateList(anchor, touple.getB_link()));
 							if (candidates.contains(gt))
 							{
 								countCandidateFound++;

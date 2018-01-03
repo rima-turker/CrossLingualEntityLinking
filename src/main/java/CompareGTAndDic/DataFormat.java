@@ -1,4 +1,4 @@
-package CandidateGeneration;
+package CompareGTAndDic;
 
 public enum DataFormat {
 	JSON("application/json"),

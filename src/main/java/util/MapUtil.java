@@ -174,13 +174,22 @@ public class MapUtil {
 	public static List<String> getFirstNElementInList(Map<String, Double> longMap, int n) {
 		final List<String> trimmedMap = new ArrayList<>();
 		int i = 0;
-		for (final Entry<String, Double> entry : longMap.entrySet()) {
-			trimmedMap.add(entry.getKey());
-			if (i > n) {
-				break;
+		if (longMap.size()>n) {
+			for (final Entry<String, Double> entry : longMap.entrySet()) {
+				trimmedMap.add(entry.getKey());
+				if (i > n) {
+					break;
+				}
+				i++;
 			}
-			i++;
 		}
+		else
+		{
+			for (final Entry<String, Double> entry : longMap.entrySet()) {
+				trimmedMap.add(entry.getKey());
+			}
+		}
+		
 		return trimmedMap;
 	}
 }

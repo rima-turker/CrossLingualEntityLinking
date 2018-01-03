@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import AnchorDictionaryGenerator.DictioanryGenerator;
-import DataPreparation.EDBanchmark_DataExtraction;
+import BenchmarkPreparation.EDBanchmark_DataExtraction;
 import util.Config;
 import util.MapUtil;
 import util.Tuple;
@@ -34,8 +34,8 @@ public class CompareGroundTruthWithDictionary {
 		long canNotFound = 0;
 		long foundButNotInTopN = 0;
 		for (Tuple tp : gt) {
-			final String mention = tp.getA();
-			final String url = tp.getB().toLowerCase();
+			final String mention = tp.getA_mention();
+			final String url = tp.getB_link().toLowerCase();
 
 			final Map<String, Double> urlCandidates = dic.get(mention);
 			if (urlCandidates == null) {
@@ -80,8 +80,8 @@ public class CompareGroundTruthWithDictionary {
 		for (final Entry<String, List<Tuple>> entry : mapAnchor.entrySet()) {
 			final List<Tuple> lstTemp = new ArrayList<>(entry.getValue());
 			for (final Tuple t : lstTemp) {
-				final Tuple newT = new Tuple(t.getA(),
-						t.getB().replace("<http://dbpedia.org/resource/", "").replace("> ;", ""));
+				final Tuple newT = new Tuple(t.getA_mention(),
+						t.getB_link().replace("<http://dbpedia.org/resource/", "").replace("> ;", ""));
 				result.add(newT);
 			}
 		}

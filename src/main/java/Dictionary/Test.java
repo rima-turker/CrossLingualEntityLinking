@@ -45,8 +45,8 @@ public class Test
 		Map<String, Integer> mapAnchorTop = new HashMap<String, Integer>();
 		for (Tuple touple: gt) 
 		{
-			String anchor = touple.getA();
-			String gt_link = touple.getB();
+			String anchor = touple.getA_mention();
+			String gt_link = touple.getB_link();
 
 			if (dictionary.containsKey(anchor))
 			{

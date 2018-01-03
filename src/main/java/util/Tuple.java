@@ -1,22 +1,32 @@
 package util;
 
 public class Tuple {
-	private final String a;
-	private final String b;
+	private String a;
+	private String b;
+	public Tuple() {
+		this.a = "";
+		this.b = "";
+	}
 	public Tuple(String a, String b) {
 		super();
 		this.a = a;
 		this.b = b;
 	}
-	public String getA() {
+	public void setA_mention(String a) {
+		this.a = a;
+	}
+	public void setB_link(String b) {
+		this.b=b;
+	}
+	public String getA_mention() {
 		return a;
 	}
-	public String getB() {
+	public String getB_link() {
 		return b;
 	}
 	@Override
 	public String toString() {
-		return "Touple [a=" + a + ", b=" + b + "]";
+		return "Tuple [a=" + a + ", b=" + b + "]";
 	}
 	
 	@Override

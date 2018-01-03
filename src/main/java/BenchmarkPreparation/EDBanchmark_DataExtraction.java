@@ -1,4 +1,4 @@
-package DataPreparation;
+package BenchmarkPreparation;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -93,7 +93,7 @@ public class EDBanchmark_DataExtraction
 				List<Tuple> lst = new ArrayList<>(entry.getValue());
 				for (Tuple t: lst) {
 
-					writer.write(t.getA());
+					writer.write(t.getA_mention());
 					writer.write("\n");	
 				}
 			}

@@ -20,10 +20,22 @@ public class ConcatenateTrainingFiles
 		String line="";
 		try (BufferedReader br = new BufferedReader(new FileReader(NEGATIVE_TRAINSET)))
 		{
+			System.out.println(NEGATIVE_TRAINSET);
 			while ((line = br.readLine()) != null) 
 			{
-				String[] split = line.split("\t\t");
-				allTrainSet.add(split[1]+"\t"+split[2]);
+				if (line.length()>1) {
+					String[] split = line.split("\t\t");
+					if (split.length>2) {
+
+						allTrainSet.add(split[1]+"\t"+split[2]);
+					}
+					else
+					{
+						System.out.println("negative line is not processed properly "+line);
+					}
+				}
+
+				
 			}
 		}
 		catch (IOException e) {
@@ -33,10 +45,20 @@ public class ConcatenateTrainingFiles
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(POSITIVE_TRAINSET)))
 		{
+			System.out.println(POSITIVE_TRAINSET);
 			while ((line = br.readLine()) != null) 
 			{
-				String[] split = line.split("\t\t");
-				allTrainSet.add(split[1]+"\t"+split[2]);
+				if (line.length()>1) {
+					String[] split = line.split("\t\t");
+					if (split.length>2) {
+
+						allTrainSet.add(split[1]+"\t"+split[2]);
+					}
+					else
+					{
+						System.out.println("positive line is not processed properly "+line);
+					}
+				}
 			}
 		}
 		catch (IOException e) {

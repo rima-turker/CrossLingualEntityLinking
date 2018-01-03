@@ -1,5 +1,7 @@
 /.gradle/
 /build/
+AIDA-YAGO*
+/CONLL/
 /bin/
 /src/main/resources/*
 /src/test/resource/*

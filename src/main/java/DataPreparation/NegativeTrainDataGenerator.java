@@ -19,6 +19,16 @@ import util.FileUtil;
 import util.HTMLLinkExtractor;
 import util.URLUTF8Encoder;
 
+
+/***
+ * This class responsible fo generating negTIve sentences for training
+ * but no feature calculation
+ * gets the regular annotated sentences then replaces the annotation with the wrong entity
+ * the we have negative sentence in terms of not true information
+ * After that features are calcukated label will be 0
+ * @author rtue
+ *
+ */
 public class NegativeTrainDataGenerator {
 	private static final String NAME_OF_NEGATIVE_DATA_SET = "NegativeTrainSet.txt";
 	private static final String ADDRESS_OF_POSTIVE_TARINSET = Config.getString("ADDRESS_OF_POSTIVE_TARINSET", "");

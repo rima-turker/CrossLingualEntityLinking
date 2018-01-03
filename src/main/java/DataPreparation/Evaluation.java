@@ -22,6 +22,7 @@ import org.bytedeco.javacpp.RealSense.context;
 
 import java.util.Map.Entry;
 import AnchorDictionaryGenerator.DictioanryGenerator;
+import BenchmarkPreparation.EDBanchmark_DataExtraction;
 import model.HtmlLink;
 import util.Config;
 import util.MapUtil;
@@ -141,8 +142,8 @@ public class Evaluation {
 	private  Runnable handle(final String sentence, final List<Tuple> list) {
 		return () -> {
 			for (final Tuple t : list) {
-				final String anchorText = t.getA();
-				final String trueURL = URLUTF8Encoder.decodeJavaNative(t.getB().replace("<http://dbpedia.org/resource/", "").replace("> ;", "")).toLowerCase();							
+				final String anchorText = t.getA_mention();
+				final String trueURL = URLUTF8Encoder.decodeJavaNative(t.getB_link().replace("<http://dbpedia.org/resource/", "").replace("> ;", "")).toLowerCase();							
 
 				final Map<String, List<Helper>> trueUrlMap = new HashMap<>();
 
@@ -167,8 +168,8 @@ public class Evaluation {
 
 						final String[] onlyFeatures = features.toString().split("\t\t");
 						final Tuple pythonResult = getPythonResult(onlyFeatures[1].replaceAll("\t", ","));
-						final Helper helper = new Helper(candidate, Float.parseFloat(pythonResult.getA()),
-								Float.parseFloat(pythonResult.getB()));
+						final Helper helper = new Helper(candidate, Float.parseFloat(pythonResult.getA_mention()),
+								Float.parseFloat(pythonResult.getB_link()));
 						listOfHelper.add(helper);
 					}
 					trueUrlMap.put(trueURL, listOfHelper);
