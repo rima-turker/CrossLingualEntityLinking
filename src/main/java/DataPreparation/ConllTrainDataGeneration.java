@@ -47,12 +47,15 @@ public class ConllTrainDataGeneration {
 	private static final boolean TRAIN_POSITIVE=Config.getBoolean("TRAIN_POSITIVE", false);
 	private static final String RESULT_FILE_CONLL;
 	private static final String LABEL;
-	private static String TRAIN_MENTIONS;
-	private static final String TRAIN_SENTENCES= Config.getString("TRAIN_SENTENCES_CONLL","");
+//	private static String TRAIN_MENTIONS;
+//	private static final String TRAIN_SENTENCES= Config.getString("TRAIN_SENTENCES_CONLL","");
+	
+	//private Map<String, List<ConllData>> map_train ;
+	private List<ConllData> lstSentencesAndMentions_train;
 	
 	static{
 		if(TRAIN_POSITIVE){
-			RESULT_FILE_CONLL = "TrainSetConll.ttl";
+			RESULT_FILE_CONLL = "PositiveTrainSetConll.ttl";
 			LABEL = "1";
 			
 		}else{
@@ -60,7 +63,6 @@ public class ConllTrainDataGeneration {
 			LABEL = "0";
 		}
 	}
-
 	private static final int SIZE_OF_WORD_VECTOR = 100;
 	private static final String DBR = "dbr:";		
 	private static final Set<String> trainSet = new CopyOnWriteArraySet<>();
@@ -68,73 +70,56 @@ public class ConllTrainDataGeneration {
 	private static AtomicInteger ALL_FEATURES_ARE_ZERO_ERROR = new AtomicInteger(0);
 	private static AtomicInteger NO_ANCHOR_ERROR = new AtomicInteger(0);
 
-	public static void main(String[] args) throws IOException {
+	public void startGeneratingTrainingSetConll() {
 		
+		System.out.println("LABEL "+LABEL);
 		ConllDataSetParser conll = new ConllDataSetParser();
-		
-		//docID, SentenceID,sentence
-//		Map<String, Map<Integer, String>> mapConllTrainSentences = new HashMap<>(conll.getMapSentence_train());
-//		//docID SentenceID, Tuple<mention,wikilink>
-//		Map<String, List<ConllData>> mapConllTrainMentions = new HashMap<>(conll.getMapMention_train());
-//		Map<String, Map<Integer, String>> mapConllTestbSentences = new HashMap<>(conll.getMapSentence_testb());
-//		Map<String, List<ConllData>> mapConllTestbMentions = new HashMap<>(conll.getMapMention_testb());
-
-		
-		Map<String, List<ConllData>> mapConllTrainSentences = new HashMap<>(conll.getMap_train());
-		//docID SentenceID, Tuple<mention,wikilink>
-		Map<String, List<ConllData>> mapConllTrainMentions = new HashMap<>();
-		Map<String, Map<Integer, String>> mapConllTestbSentences = new HashMap<>();
-		Map<String, List<ConllData>> mapConllTestbMentions = new HashMap<>();
-
-		
+		lstSentencesAndMentions_train= new ArrayList<>(conll.getLstSentencesAndMentions_train());
 		//showSizeOfResultPeridically();
-	//	Map<String, String> trainSentencs= new HashMap<>(readSentencesConll(TRAIN_SENTENCES));
 		if(TRAIN_POSITIVE){
 			System.out.println("Positive Dataset generation");
+			System.out.println("Size of lstSentencesAndMentions_train "+lstSentencesAndMentions_train.size());
+			//map_train= new HashMap<>(conll.getMap_train());
 			
-			//iteratingOverDocs --> DocId, Connll
-			//collect sentence and its mentions so send the sentence and its mentions
-			for (Entry<String, List<ConllData>> entry:mapConllTrainMentions.entrySet()){
-				System.out.println();
-				String docID = entry.getKey();
-				List<ConllData> lstOfMentionsInDoc = new ArrayList<>(entry.getValue());
-				//String[] sentencesInDoc = new String[mapConllTrainSentences.get(docID).size()];
-				Map<Integer, List<Tuple>> mapSentencesAndMentions= new HashMap<>();
-				
-				for (ConllData conllMention: lstOfMentionsInDoc)
-				{
-					Map<Integer, String> sentenceIDSentence ;
-					Integer sentenceID = conllMention.getSentenceId();
-					String sentence = "";
-					System.out.println(sentence);
-					if (mapSentencesAndMentions.containsKey(sentenceID)) {
-						List<Tuple> lstTemp = new ArrayList<>(mapSentencesAndMentions.get(sentenceID));
-						//lstTemp.add(conllMention.getMentionAndURI());
-						mapSentencesAndMentions.put(sentenceID, lstTemp);
-					} 
-					else {
-						List<Tuple> lstTemp = new ArrayList<>();
-						//lstTemp.add(conllMention.getMentionAndURI());
-						mapSentencesAndMentions.put(sentenceID, lstTemp);
-					}
-					
-				}
-//				for (Entry<Integer, List<Tuple>> entry:mapSentencesAndMentions.entrySet()) {
-//					processThisLine(, final List<Tuple> mentionsIntheSentence)
-//				}
-				
-				
-			}
-			
+			generateDataSet(lstSentencesAndMentions_train);
 		}else{
-			System.out.println("Negatives Dataset generation");//NegativeTrainConll.replaceWithWrongEntities();	
-			//generateTrainingData(trainSentencs,NegativeTrainConll.replaceWithWrongEntities());
+			System.out.println("Negative Dataset generation");
+			System.out.println("Size of lstSentencesAndMentions_train "+lstSentencesAndMentions_train.size());
+			List<ConllData>  lstwrongMentionURIMap = new ArrayList<>(NegativeTrainConll.replaceWithWrongEntities(lstSentencesAndMentions_train));
+			int countMentions=0;
 			
+			for (ConllData conll1 : lstSentencesAndMentions_train) 
+			{
+				countMentions+=conll1.getMentionAndURI().size();
+			}
+			System.out.println("train sentences "+ lstSentencesAndMentions_train.size());
+			System.out.println("train mentions "+ countMentions);
+
+			countMentions=0;
+			for (ConllData conll1 : lstwrongMentionURIMap) 
+			{
+				//System.out.println(conll.getMentionAndURI());
+				countMentions+=conll1.getMentionAndURI().size();
+			}
+			System.out.println("Wrong train sentences "+ lstwrongMentionURIMap.size());
+			System.out.println("Wrong train mentions "+ countMentions);
+			generateDataSet(lstwrongMentionURIMap);
+		}
+		System.err.println("NO_ANCHOR_ERROR= "+NO_ANCHOR_ERROR);
+	}
+
+	private void generateDataSet(List<ConllData> lstSentencesAndMentions) {
+		for(ConllData conllData : lstSentencesAndMentions)
+		{
+			StringBuilder oneRow = processThisLine(conllData.getSentence(), conllData.getMentionAndURI());
+			if(oneRow!=null){
+				trainSet.add(oneRow.toString());
+				LOG.info(oneRow.toString());
+			}
 		}
 		System.err.println("Start writing to file....");
 		FileUtil.writeDataToFile(new ArrayList<>(trainSet), RESULT_FILE_CONLL, false);
 		System.err.println("ALL_FEATURES_ARE_ZERO_ERROR= "+ALL_FEATURES_ARE_ZERO_ERROR);
-//		System.err.println("NO_ANCHOR_ERROR= "+NO_ANCHOR_ERROR);
 	}
 
 	private static void generateTrainingData(Map<String, String> trainSentencs,
@@ -264,7 +249,7 @@ public class ConllTrainDataGeneration {
 			if(f1==0 && f2 ==0 && f3 ==0)
 			{
 				ALL_FEATURES_ARE_ZERO_ERROR.incrementAndGet();
-				//System.out.println("All features are zero "+ mention);
+				System.out.println("All features are zero "+ mention);
 			}
 			else
 			{

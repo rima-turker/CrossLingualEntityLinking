@@ -17,8 +17,10 @@ public class CompareConllWithDictionary {
 
 	private static int TOP_N = Config.getInt("TOPN_CANDIDATES", -1);
 	final static DictioanryGenerator dictioanryGenerator = new DictioanryGenerator();
-	final static Map<String, Map<String, Double>> dic = dictioanryGenerator.readDictionryFromFile();
+	static Map<String, Map<String, Double>> dic;// = dictioanryGenerator.readDictionryFromFile();
 	final static Map<String,List<String>> redirectPages = dictioanryGenerator.readRedirectPages();
+	final static Map<String,List<String>> redirectPages_otherWay = dictioanryGenerator.readRedirectPages_otherway();
+	
 	public static void main(String[] args) {
 		
 		for (int i = 50; i <=50; i+=10) {
@@ -87,7 +89,7 @@ public class CompareConllWithDictionary {
 			System.err.println("Candidates are generated but correct URI could not found  "+TOP_N+ ", "+candidateGeneratedButCorrectURI);
 		}
 	}
-	public Map<String, Double> generateCandidates(String mention)
+	public static Map<String, Double> generateCandidates(String mention)
 	{
 		if (dic.containsKey(mention)) {
 			return dic.get(mention);
@@ -100,9 +102,13 @@ public class CompareConllWithDictionary {
 		}
 		return null;
 	}
-	public List<String> getRedirectPages(String uri)
+	public static List<String> getRedirectPages(String uri)
 	{
 		return redirectPages.get(uri);
+	}
+	public static List<String> getRedirectPages_otherWay(String uri)
+	{
+		return redirectPages_otherWay.get(uri);
 	}
 	private void candidateGenerationBasedOnCOntextSimilarity(String anchor) 
 	{

@@ -1,4 +1,4 @@
-package DataPreparation;
+package Evaluation;
 
 /**
  * This is just a helper class to keep these three elements together

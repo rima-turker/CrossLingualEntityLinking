@@ -11,6 +11,7 @@ AIDA-YAGO*
 /split_subSampleWikiSentencesLinks_0 (copy).3/
 /split_subSampleWikiSentencesLinks_0.3/
 /log/
+/Results/
 SVM_TEST.py
 Single_SVC
 anchorDictionaryOnlyWikipediaUrls

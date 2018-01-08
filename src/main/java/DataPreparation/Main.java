@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import BenchmarkPreparation.ConllDataSetParser;
+import Evaluation.LazyDisambuguation;
 import util.ConllData;
 
 public class Main {

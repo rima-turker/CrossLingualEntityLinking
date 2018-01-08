@@ -31,20 +31,21 @@ import util.Tuple;
 public class ConllDataSetParser {
 
 	private static final String CONLL_MAIN_FILE = Config.getString("CONLL_DATASET", "");
-	private static final Logger LOG = Logger.getLogger(ConllDataSetParser.class);
-
-	private Map<String, List<ConllData>> map_train ;
-	private Map<String, List<ConllData>> map_testb ;
+	//private static final Logger LOG = Logger.getLogger(ConllDataSetParser.class);
 	
 	private List<ConllData> lstSentencesAndMentions_testb = new ArrayList<>();
 	private List<ConllData> lstSentencesAndMentions_train = new ArrayList<>();
 	
+	private Map<String, List<ConllData>> map_train;
+	private Map<String, List<ConllData>> map_testb ;
+	
 	int  count=0;
 	public ConllDataSetParser() {
+		//System.out.println("CONLL_MAIN_FILE "+CONLL_MAIN_FILE );
 		readDocbyDoc();
-		findCountSentencesAndMentions();
-		map_train= new HashMap<>(separateMnetionsByDocID(lstSentencesAndMentions_train));
-		map_testb= new HashMap<>(separateMnetionsByDocID(lstSentencesAndMentions_testb));
+		map_train=new HashMap<>(separateMnetionsByDocID(lstSentencesAndMentions_train));;
+		map_testb = new HashMap<>(separateMnetionsByDocID(lstSentencesAndMentions_testb));
+		//findCountSentencesAndMentions();
 	}
 	private Map<String, List<ConllData>> separateMnetionsByDocID(List<ConllData> lstSentencesAndMentions_testb2) {
 		Map<String, List<ConllData>> result = new HashMap<>();

@@ -38,7 +38,7 @@ import util.MapUtil;
  *
  */
 
- //TODO ADD REDIRECT PAGES to your dictionary to enrich it
+//TODO ADD REDIRECT PAGES to your dictionary to enrich it
 public class DictioanryGenerator {
 
 	private final String RESULT_FILE = Config.getString("ANCHOR_DICTIONARY", "");
@@ -47,17 +47,17 @@ public class DictioanryGenerator {
 	//private static int NUMBER_OF_THREADS = 1;
 	private static Map<String,Map<String,Double>> dictionary = new ConcurrentHashMap<>();
 	private static Map<String,List<String>> redirect = new HashMap<>();
-	private final String REDIRECT_FILE = Config.getString("WIKIPEDIA_REDIRECT_PAGES", "");
-	
+	private final String REDIRECT_FILE = Config.getString("REDIRECT_FILE", "");
+
 	//WIKIPEDIA_REDIRECT_PAGESConfig.getString("ANCHOR_DICTIONARY", "");
 	//private 
-	
+
 	//https://en.wikipedia.org/w/api.php?action=query&blfilterredir=redirects&bllimit=max&bltitle=Yahoo!&format=json&list=backlinks
-	
-//	public static void main(String[] args) {
-//		createDictionary();		
-//		//dictionary = readDictionryFromFile();
-//	}
+
+	//	public static void main(String[] args) {
+	//		createDictionary();		
+	//		//dictionary = readDictionryFromFile();
+	//	}
 
 
 	private void createDictionary() {
@@ -73,7 +73,7 @@ public class DictioanryGenerator {
 			}
 			executor.shutdown();
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			
+
 			convertFrequencyToProbability();
 			writeDictionary();
 		}catch(Exception e) {
@@ -189,7 +189,7 @@ public class DictioanryGenerator {
 		if(StringUtils.containsIgnoreCase(url,"https://")){
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -211,7 +211,7 @@ public class DictioanryGenerator {
 			}
 		}
 	}
-	
+
 	/***
 	 * This function collects the redirect pages 
 	 * Map<String,List<String>>
@@ -219,9 +219,10 @@ public class DictioanryGenerator {
 	 * List<String> stores the list of pages that redirects to that page
 	 * @return
 	 */
-	
+
 	public Map<String,List<String>> readRedirectPages()
 	{
+		System.out.println(REDIRECT_FILE);
 		Map<String,List<String>> result = new HashMap<>();
 		String line=null;
 		try (BufferedReader br = new BufferedReader(new FileReader(REDIRECT_FILE))) {
@@ -229,17 +230,51 @@ public class DictioanryGenerator {
 				final String[] split = line.toLowerCase().split("\t");
 				final String fromRedirects = split[0].toLowerCase();
 				final String toRedirects = split[1].toLowerCase();//mainpage(exist one)
-				List<String> lstTemp ;
-				if (result.containsKey(toRedirects)) //mainPage
-				{
-					lstTemp = new ArrayList<>(result.get(toRedirects));
+				if (!fromRedirects.contains("template:")&&!toRedirects.contains("template:")) {
+					List<String> lstTemp ;
+					if (result.containsKey(toRedirects)) //mainPage
+					{
+						lstTemp = new ArrayList<>(result.get(toRedirects));
+					}
+					else
+					{
+						lstTemp = new ArrayList<>();
+					}
+					lstTemp.add(fromRedirects);
+					result.put(toRedirects, lstTemp);
 				}
-				else
-				{
-					lstTemp = new ArrayList<>();
+			}
+		} catch (Exception e) {
+			System.err.println(line);
+			e.printStackTrace();
+		}	
+
+		return result;
+	}
+	public Map<String,List<String>> readRedirectPages_otherway()
+	{
+		System.out.println(REDIRECT_FILE);
+		Map<String,List<String>> result = new HashMap<>();
+		String line=null;
+		try (BufferedReader br = new BufferedReader(new FileReader(REDIRECT_FILE))) {
+			while ((line = br.readLine()) != null) {
+				final String[] split = line.toLowerCase().split("\t");
+				final String fromRedirects = split[0].toLowerCase();
+				final String toRedirects = split[1].toLowerCase();//mainpage(exist one)
+				if (!fromRedirects.contains("template:")&&!toRedirects.contains("template:")) {
+					List<String> lstTemp ;
+					if (result.containsKey(fromRedirects)) //mainPage
+					{
+						lstTemp = new ArrayList<>(result.get(fromRedirects));
+					}
+					else
+					{
+						lstTemp = new ArrayList<>();
+					}
+					lstTemp.add(toRedirects);
+					result.put(fromRedirects, lstTemp);
 				}
-				lstTemp.add(fromRedirects);
-				result.put(toRedirects, lstTemp);
+
 			}
 		} catch (Exception e) {
 			System.err.println(line);
@@ -248,6 +283,8 @@ public class DictioanryGenerator {
 		return result;
 	}
 	public Map<String,Map<String,Double>> readDictionryFromFile() {
+
+		System.out.println("reading dictionary");
 		Map<String,Map<String,Double>> result = new ConcurrentHashMap<>();
 		String line=null;
 		try (BufferedReader br = new BufferedReader(new FileReader(RESULT_FILE))) {
